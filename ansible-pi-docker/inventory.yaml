@@ -1,0 +1,4 @@
+myhosts:
+  hosts:
+    raspberrypi:
+      ansible_host:
