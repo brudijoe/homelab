@@ -1,6 +1,35 @@
 # homelab
 Homelab playground for learning DevOps with a Raspberry Pi
 
+## Setup
+
+### Ansible Vault – Creating secrets.pass
+
+The `secrets.pass` file is **not** stored in this repository (see `.gitignore`).
+It must be created locally once:
+
+```bash
+echo "yourSecureVaultPassword" > ./ansible-pi-docker/secrets.pass
+```
+
+This file acts as the key to decrypt `vault.yml`, which contains the SSH
+credentials for the Raspberry Pi.
+
+The encrypted `vault.yml` is then created like this:
+
+```bash
+ansible-vault create ./ansible-pi-docker/group_vars/myhosts/vault.yml --vault-password-file=./ansible-pi-docker/secrets.pass
+```
+
+Enter the following content in the editor and save:
+
+```yaml
+vault_ansible_ssh_pass: "yourRaspberryPiSSHPassword"
+```
+
+> **Note:** Never commit `secrets.pass`. The `vault.yml` on the other hand is
+> encrypted and can safely be checked into the repository.
+
 ## Git Commit Message Conventions
 
 This project follows a simple and consistent commit message style.
