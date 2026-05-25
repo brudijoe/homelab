@@ -1,5 +1,0 @@
-myhosts:
-  hosts:
-    raspberrypi:
-      # TODO add ip after researching ansible vault
-      ansible_host:
