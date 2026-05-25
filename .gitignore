@@ -1,0 +1,6 @@
+secrets.pass
+
+# temporary
+*.decrypted
+*.plain
+*.retry
