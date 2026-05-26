@@ -1,0 +1,10 @@
+- name: Install docker on raspberrypi_local
+  hosts: myhosts
+  become: true # Execute sudo
+
+  tasks:
+  - name: Install docker
+    apt:
+      name: docker.io
+      state: present # Installs/Creates it
+      update_cache: true  # Update apt cache (= apt-get update) before installing, then install docker.io
