@@ -7,4 +7,4 @@
     apt: # advanced package tool
       name: docker.io
       state: present # apt install
-      update_cache: true  # Update apt cache (= apt-get update) before installing, then install docker.io
+      update_cache: true  # Run the equivalent of "apt-get update" before the operation to ensure that docker.io exists
