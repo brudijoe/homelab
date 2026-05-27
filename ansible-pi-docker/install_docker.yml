@@ -4,7 +4,7 @@
 
   tasks:
   - name: Install docker
-    apt:
+    apt: # advanced package tool
       name: docker.io
-      state: present # Installs/Creates it
+      state: present # apt install
       update_cache: true  # Update apt cache (= apt-get update) before installing, then install docker.io
