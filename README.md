@@ -3,6 +3,14 @@ Homelab playground for learning DevOps with a Raspberry Pi
 
 ## Setup
 
+### Install Ansible on WSL
+
+You can use the install_ansible.sh script to install ansible on your WSL.
+
+```bash
+sudo bash ./ansible-pi-docker/install_ansible.sh
+```
+
 ### Ansible Vault – Creating secrets.pass
 
 The `secrets.pass` file is **not** stored in this repository (see `.gitignore`).
