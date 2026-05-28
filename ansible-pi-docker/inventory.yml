@@ -4,6 +4,6 @@ myhosts:
     ansible_python_interpreter: /usr/bin/python3 # current version on raspberry pi python3.13
   hosts:
     raspberrypi_local:
-      ansible_host: 192.168.0.9
-      ansible_user: pi
+      ansible_host: "{{ ansible_host_name }}"
+      ansible_user: "{{ ansible_user_name }}"
       ansible_ssh_pass: "{{ vault_ansible_ssh_pass }}"
