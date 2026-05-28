@@ -1,9 +1,28 @@
 - name: My first play
   hosts: myhosts
-  tasks:
-   - name: Ping my hosts
-     ansible.builtin.ping:
 
-   - name: Print message
-     ansible.builtin.debug:
-       msg: Hello world
+  tasks:
+    - name: Ping my hosts
+      ansible.builtin.ping:
+
+    - name: Print message
+      ansible.builtin.debug:
+        msg: Hello world
+
+    - name: Add raspberry pi user to the docker group
+      user:
+        name: "{{ ansible_user_name }}"
+        groups: docker
+        append: true # add docker group without removing user from other groups like sudo
+
+    - name: Reset SSH connection to apply group changes
+      meta: reset_connection
+
+    - name: Run Docker container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
+        state: started # Asserts that the container is first present, and then if the container is not running moves it to a running state
+        restart_policy: always
+        published_ports:
+          - "{{ host_port }}:{{ container_port }}"
