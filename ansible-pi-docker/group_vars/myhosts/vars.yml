@@ -1,0 +1,6 @@
+ansible_host_name: "192.168.0.9"
+ansible_user_name: "pi"
+container_name: "welcome-app"
+image_name: "docker/welcome-to-docker"
+host_port: "8080"
+container_port: "80"
