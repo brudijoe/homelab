@@ -4,3 +4,6 @@ secrets.pass
 *.decrypted
 *.plain
 *.retry
+
+# vs code
+.vscode/settings.json
