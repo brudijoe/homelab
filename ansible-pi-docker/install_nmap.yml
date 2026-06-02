@@ -1,9 +1,0 @@
-- name: Install Nmap on raspberrypi_local
-  hosts: myhosts
-  become: true # Execute sudo
-
-  tasks:
-    - name: Install Nmap
-      ansible.builtin.apt: # advanced package tool
-        name: nmap
-        state: present # apt install

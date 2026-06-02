@@ -1,0 +1,8 @@
+- name: Raspberry Pi Setup
+  hosts: myhosts
+  become: true # Execute sudo
+
+  roles:
+    - common
+    - docker
+    - nmap

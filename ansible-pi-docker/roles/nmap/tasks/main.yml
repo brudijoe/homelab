@@ -1,0 +1,5 @@
+# Ansible Tasks Schema
+- name: Install Nmap
+  ansible.builtin.apt: # advanced package tool
+    name: nmap
+    state: present # apt install
