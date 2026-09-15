@@ -1,0 +1,5 @@
+# https://github.com/ansible-collections/community.postgresql
+# ansible-galaxy collection install -r requirements.yml
+---
+collections:
+  - name: community.postgresql

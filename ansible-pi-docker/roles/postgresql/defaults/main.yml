@@ -1,0 +1,6 @@
+# Ansible Tasks Schema
+postgresql_packages:
+  - postgresql
+  - postgresql-contrib
+
+postgresql_service: postgresql
