@@ -1,7 +1,4 @@
 # Ansible Tasks Schema
 - name: Install networking tools
-  ansible.builtin.apt: # advanced package tool
-    name:
-      - nmap
-      - ufw
-    state: present # apt install
+  ansible.builtin.include_tasks:
+    file: install.yml

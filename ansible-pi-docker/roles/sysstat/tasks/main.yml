@@ -1,6 +1,4 @@
 # Ansible Tasks Schema
 - name: Install sysstat
-  ansible.builtin.apt: # advanced package tool
-    name:
-      - sysstat
-    state: present # apt install
+  ansible.builtin.include_tasks:
+    file: install.yml

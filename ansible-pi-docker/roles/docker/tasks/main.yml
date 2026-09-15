@@ -1,10 +1,7 @@
 # Ansible Tasks Schema
 - name: Install docker
-  ansible.builtin.apt: # advanced package tool
-    name: docker.io
-    state: present # apt install
-    update_cache: true # Run the equivalent of "apt-get update" before the operation to ensure that docker.io exists
-    cache_valid_time: 3600 # Only update when older than 1 hour
+  ansible.builtin.include_tasks:
+    file: install.yml
 
 - name: Add raspberry pi user to the docker group
   user:

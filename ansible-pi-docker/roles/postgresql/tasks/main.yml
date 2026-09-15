@@ -1,0 +1,3 @@
+# Ansible Tasks Schema
+- name: Install PostgreSQL
+  ansible.builtin.include_tasks: install.yml

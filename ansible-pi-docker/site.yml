@@ -6,4 +6,5 @@
     - common
     - docker
     - networking
+    - postgresql
     - sysstat
