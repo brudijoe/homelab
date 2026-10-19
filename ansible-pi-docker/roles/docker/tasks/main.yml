@@ -12,7 +12,7 @@
 - name: Reset SSH connection to apply group changes
   meta: reset_connection
 
-- name: Run Docker container
+- name: Run Docker test container
   community.docker.docker_container:
     name: "{{ container_name }}"
     image: "{{ image_name }}"

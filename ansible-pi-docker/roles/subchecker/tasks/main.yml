@@ -1,0 +1,27 @@
+# Clone the frontend Git repository to the Raspberry Pi.
+- name: Checkout frontend repository
+  ansible.builtin.git:
+    repo: "{{ subchecker_frontend_repo_url }}" # URL of the frontend Git repository
+    dest: "{{ subchecker_frontend_path }}" # Directory on the Raspberry Pi where the repository is stored
+    version: main # Git branch to use
+    update: true # Pull the latest changes if the repository already exists
+
+# Build a Docker image from the frontend's Dockerfile.
+- name: Build frontend Docker image
+  community.docker.docker_image:
+    name: subchecker-frontend # Name of the Docker image
+    tag: latest # Version tag of the image
+    source: build # Build the image from the local source code
+    build:
+      path: "{{ subchecker_frontend_path }}/subchecker-web-app" # Directory containing the Dockerfile
+
+# Start the frontend container using the newly built image.
+- name: Run frontend container
+  community.docker.docker_container:
+    name: subchecker-frontend # Name of the running container
+    image: subchecker-frontend:latest # Docker image used to create the container
+    state: started # Ensure the container exists and is running
+    restart_policy: always # Automatically restart the container if it stops
+    published_ports:
+      - "{{ subchecker_host_port }}:{{ subchecker_container_port }}" # Map the Raspberry Pi's port to the container's port
+    recreate: true # Recreate the container on every playbook run

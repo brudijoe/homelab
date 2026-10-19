@@ -7,4 +7,5 @@
     - docker
     - networking
     - postgresql
+    - subchecker
     - sysstat
