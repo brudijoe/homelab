@@ -12,6 +12,7 @@
     name: subchecker-frontend # Name of the Docker image
     tag: latest # Version tag of the image
     source: build # Build the image from the local source code
+    force_source: true # Rebuild even if the image already exists
     build:
       path: "{{ subchecker_frontend_path }}/subchecker-web-app" # Directory containing the Dockerfile
 
