@@ -3,3 +3,4 @@
 ---
 collections:
   - name: community.postgresql
+  - name: community.docker
