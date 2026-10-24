@@ -1,28 +1,147 @@
-# Clone the frontend Git repository to the Raspberry Pi.
-- name: Checkout frontend repository
+- name: Check required Subchecker secrets
+  ansible.builtin.assert:
+    that:
+      - vault_subchecker_db_password is defined
+      - vault_subchecker_ntfy_topic is defined
+    fail_msg: >-
+      Add vault_subchecker_db_password and vault_subchecker_ntfy_topic to the
+      encrypted Ansible vault.
+
+- name: Validate Subchecker secrets
+  ansible.builtin.assert:
+    that:
+      - vault_subchecker_db_password is match('^[A-Fa-f0-9]{32,}$')
+      - vault_subchecker_ntfy_topic | length > 0
+    fail_msg: >-
+      The Subchecker database password must contain at least 32 hexadecimal
+      characters and the ntfy topic must not be empty.
+
+- name: Checkout Subchecker repository
   ansible.builtin.git:
-    repo: "{{ subchecker_frontend_repo_url }}" # URL of the frontend Git repository
-    dest: "{{ subchecker_frontend_path }}" # Directory on the Raspberry Pi where the repository is stored
-    version: main # Git branch to use
-    update: true # Pull the latest changes if the repository already exists
+    repo: "{{ subchecker_repo_url }}"
+    dest: "{{ subchecker_path }}"
+    version: main
+    update: true
 
-# Build a Docker image from the frontend's Dockerfile.
-- name: Build frontend Docker image
+- name: Create Subchecker Docker network
+  community.docker.docker_network:
+    name: subchecker-network
+    state: present
+
+- name: Install Subchecker environment file
+  ansible.builtin.template:
+    src: subchecker.env.j2
+    dest: "{{ subchecker_path }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Build Subchecker backend image
   community.docker.docker_image:
-    name: subchecker-frontend # Name of the Docker image
-    tag: latest # Version tag of the image
-    source: build # Build the image from the local source code
-    force_source: true # Rebuild even if the image already exists
+    name: subchecker-backend
+    tag: latest
+    source: build
+    force_source: true
     build:
-      path: "{{ subchecker_frontend_path }}/subchecker-web-app" # Directory containing the Dockerfile
+      path: "{{ subchecker_path }}/subchecker-backend"
+      target: runtime
 
-# Start the frontend container using the newly built image.
-- name: Run frontend container
+- name: Build Subchecker migration image
+  community.docker.docker_image:
+    name: subchecker-migrations
+    tag: latest
+    source: build
+    force_source: true
+    build:
+      path: "{{ subchecker_path }}/subchecker-backend"
+      target: migrate
+
+- name: Build Subchecker frontend image
+  community.docker.docker_image:
+    name: subchecker-frontend
+    tag: latest
+    source: build
+    force_source: true
+    build:
+      path: "{{ subchecker_path }}/subchecker-web-app"
+      target: runtime
+
+- name: Start Subchecker database
   community.docker.docker_container:
-    name: subchecker-frontend # Name of the running container
-    image: subchecker-frontend:latest # Docker image used to create the container
-    state: started # Ensure the container exists and is running
-    restart_policy: always # Automatically restart the container if it stops
+    name: subchecker-db
+    image: postgres:16
+    state: started
+    restart_policy: unless-stopped
+    env_file: "{{ subchecker_path }}/.env"
+    volumes:
+      - subchecker-postgres-data:/var/lib/postgresql/data
+    networks:
+      - name: subchecker-network
+    networks_cli_compatible: true
+
+- name: Wait for Subchecker database
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - subchecker-db
+      - pg_isready
+      - -U
+      - "{{ subchecker_db_user }}"
+      - -d
+      - "{{ subchecker_db_name }}"
+  register: subchecker_db_ready
+  changed_when: false
+  retries: 30
+  delay: 2
+  until: subchecker_db_ready.rc == 0
+
+- name: Inspect existing Subchecker backend
+  community.docker.docker_container_info:
+    name: subchecker-backend
+  register: subchecker_backend_info
+
+- name: Stop existing Subchecker backend before schema update
+  community.docker.docker_container:
+    name: subchecker-backend
+    state: stopped
+  when: subchecker_backend_info.exists
+
+- name: Apply Subchecker database schema
+  community.docker.docker_container:
+    name: subchecker-migrate
+    image: subchecker-migrations:latest
+    command: npm run db:push
+    state: started
+    detach: false
+    cleanup: true
+    env_file: "{{ subchecker_path }}/.env"
+    networks:
+      - name: subchecker-network
+    networks_cli_compatible: true
+
+- name: Start Subchecker backend
+  community.docker.docker_container:
+    name: subchecker-backend
+    image: subchecker-backend:latest
+    state: started
+    restart_policy: unless-stopped
+    env_file: "{{ subchecker_path }}/.env"
+    networks:
+      - name: subchecker-network
+    networks_cli_compatible: true
+    recreate: true
+
+- name: Start Subchecker frontend
+  community.docker.docker_container:
+    name: subchecker-frontend
+    image: subchecker-frontend:latest
+    state: started
+    restart_policy: unless-stopped
     published_ports:
-      - "{{ subchecker_host_port }}:{{ subchecker_container_port }}" # Map the Raspberry Pi's port to the container's port
-    recreate: true # Recreate the container on every playbook run
+      - "{{ subchecker_host_port }}:80"
+    networks:
+      - name: subchecker-network
+    networks_cli_compatible: true
+    recreate: true

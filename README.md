@@ -35,6 +35,25 @@ Enter the following content in the editor and save:
 vault_ansible_ssh_pass: "yourRaspberryPiSSHPassword"
 ```
 
+For Subchecker, add a database password and an ntfy topic to the encrypted
+vault. Generate a URL-safe hexadecimal password (for example,
+`openssl rand -hex 32`) so it can be used in `DATABASE_URL` without escaping:
+
+```yaml
+vault_subchecker_db_password: "64-hexadecimal-characters"
+vault_subchecker_ntfy_topic: "a-long-random-private-topic"
+```
+
+Add these entries with `ansible-vault edit
+./ansible-pi-docker/group_vars/myhosts/vault.yml`. Do not put them in the
+unencrypted `vars.yml`.
+
+The Subchecker role builds the backend and frontend images on the Raspberry Pi,
+starts PostgreSQL with a persistent Docker volume, applies the database schema,
+and publishes the frontend at port `5173`. It requires the `community.docker`
+collection and the Docker Python package; both are installed through the
+repository's Ansible requirements and Docker role.
+
 > **Note:** Never commit `secrets.pass`. The `vault.yml` on the other hand is
 > encrypted and can safely be checked into the repository.
 
